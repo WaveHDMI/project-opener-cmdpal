@@ -14,7 +14,7 @@ using ProjectOpenerExtension.Services;
 namespace ProjectOpenerExtension.Pages;
 
 /// <summary>
-/// 设置页面 - 显示和管理编辑器配置
+/// Settings page - displays and manages editor configuration
 /// </summary>
 internal sealed partial class SettingsPage : ListPage
 {
@@ -34,11 +34,11 @@ internal sealed partial class SettingsPage : ListPage
         var items = new List<IListItem>();
         var editors = _settingsService.GetEditorConfigs();
 
-        // === VS Code 系列编辑器 ===
+        // === VS Code editors ===
         items.Add(new ListItem(new NoOpCommand())
         {
             Title = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            Subtitle = "VS Code 系列编辑器",
+            Subtitle = "VS Code Editors",
             Section = "VS Code Editors"
         });
 
@@ -58,15 +58,36 @@ internal sealed partial class SettingsPage : ListPage
             });
         }
 
-        // === JetBrains 系列编辑器 ===
+        // === Visual Studio ===
         items.Add(new ListItem(new NoOpCommand())
         {
             Title = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            Subtitle = "JetBrains 系列编辑器",
+            Subtitle = "Visual Studio",
+            Section = "Visual Studio Editors"
+        });
+
+        foreach (var editor in editors.Where(e => e.Type == EditorType.VisualStudio))
+        {
+            var subtitle = BuildEditorSubtitle(editor);
+
+            items.Add(new ListItem(new NoOpCommand())
+            {
+                Title = editor.Name,
+                Subtitle = subtitle,
+                Section = "Visual Studio Editors",
+                Tags = [ new Tag { Text = editor.IsEnabled ? "✓ Enabled" : "Disabled" } ]
+            });
+        }
+
+        // === JetBrains editors ===
+        items.Add(new ListItem(new NoOpCommand())
+        {
+            Title = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            Subtitle = "JetBrains Editors",
             Section = "JetBrains Editors"
         });
 
-        foreach (var editor in editors.Where(e => e.Type != EditorType.VSCode))
+        foreach (var editor in editors.Where(e => e.Type != EditorType.VSCode && e.Type != EditorType.VisualStudio))
         {
             var subtitle = BuildEditorSubtitle(editor);
 
@@ -82,11 +103,11 @@ internal sealed partial class SettingsPage : ListPage
             });
         }
 
-        // === 自定义编辑器说明 ===
+        // === Custom editor instructions ===
         items.Add(new ListItem(new NoOpCommand())
         {
             Title = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            Subtitle = "如何添加自定义编辑器",
+            Subtitle = "How to add custom editors",
             Section = "Custom Editors"
         });
 
@@ -96,40 +117,40 @@ internal sealed partial class SettingsPage : ListPage
 
         items.Add(new ListItem(new OpenFolderCommand(settingsFolder))
         {
-            Title = "📂 打开配置文件夹",
+            Title = "📂 Open Config Folder",
             Subtitle = settingsFolder,
             Section = "Custom Editors"
         });
 
         items.Add(new ListItem(new NoOpCommand())
         {
-            Title = "📝 编辑 custom-editors.json",
-            Subtitle = "在配置文件夹中创建或编辑 custom-editors.json 文件",
+            Title = "📝 Edit custom-editors.json",
+            Subtitle = "Create or edit the custom-editors.json file in the config folder",
             Section = "Custom Editors"
         });
 
         items.Add(new ListItem(new NoOpCommand())
         {
-            Title = "💡 VS Code 编辑器格式",
+            Title = "💡 VS Code Editor Format",
             Subtitle = "{\"Id\":\"myeditor\", \"Name\":\"My Editor\", \"Type\":\"vscode\", \"DefaultExecutable\":\"myeditor\"}",
             Section = "Custom Editors"
         });
 
         items.Add(new ListItem(new NoOpCommand())
         {
-            Title = "💡 JetBrains 编辑器格式",
+            Title = "💡 JetBrains Editor Format",
             Subtitle = "{\"Id\":\"myide\", \"Name\":\"My IDE\", \"Type\":\"jetbrains\", \"DefaultExecutable\":\"myide64.exe\"}",
             Section = "Custom Editors"
         });
 
         items.Add(new ListItem(new NoOpCommand())
         {
-            Title = "🔄 重启生效",
-            Subtitle = "添加自定义编辑器后，需要重启 PowerToys 使更改生效",
+            Title = "🔄 Restart to apply",
+            Subtitle = "After adding custom editors, restart PowerToys for the changes to take effect",
             Section = "Custom Editors"
         });
 
-        return items.ToArray();
+        return [.. items];
     }
 
     private string BuildEditorSubtitle(EditorConfig editor)
@@ -153,5 +174,3 @@ internal sealed partial class SettingsPage : ListPage
         return parts.Count > 0 ? string.Join(" • ", parts) : "No configuration";
     }
 }
-
-

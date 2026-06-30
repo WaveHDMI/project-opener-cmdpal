@@ -19,7 +19,7 @@ public partial class ProjectOpenerExtensionCommandsProvider : CommandProvider
         DisplayName = "Projects";
         Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
 
-        // 使用动态设置管理器
+        // Use the dynamic settings manager
         _settingsManager = DynamicSettingsManager.Instance;
         Settings = _settingsManager.Settings;
 

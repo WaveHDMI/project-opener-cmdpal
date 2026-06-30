@@ -17,6 +17,7 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
 {
     private readonly VSCodeProjectService _vscodeService;
     private readonly JetBrainsProjectService _jetbrainsService;
+    private readonly VisualStudioProjectService _visualStudioService;
     private readonly DynamicSettingsManager _settingsService;
 
     public ProjectOpenerExtensionPage()
@@ -27,8 +28,10 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
 
         _vscodeService = new VSCodeProjectService();
         _jetbrainsService = new JetBrainsProjectService();
+        _visualStudioService = new VisualStudioProjectService();
         _settingsService = DynamicSettingsManager.Instance;
     }
+
     public override IListItem[] GetItems()
     {
         var items = new List<IListItem>();
@@ -58,6 +61,18 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
             }
         }
 
+        // Get Visual Studio projects
+        var visualStudioProjects = _visualStudioService.GetRecentProjects();
+        if (visualStudioProjects.Count > 0)
+        {
+            foreach (var project in visualStudioProjects.OrderByDescending(p => p.LastOpened))
+            {
+                var editor = editors.Find(e => e.Id == project.SourceEditorId);
+                var sectionLabel = editor != null ? $"{editor.Name} Projects" : "Visual Studio Projects";
+                items.Add(CreateProjectListItem(project, sectionLabel, editors));
+            }
+        }
+
         if (items.Count == 0)
         {
             // Check if editors are configured
@@ -65,23 +80,23 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
             {
                 items.Add(new ListItem(new NoOpCommand())
                 {
-                    Title = "First time using? Configure editors first | 首次使用?请先配置编辑器",
-                    Subtitle = "Specify the configuration file path in settings and create editors.json file | 请在设置中指定配置文件路径并创建 editors.json 文件"
+                    Title = "First time using? Configure editors first",
+                    Subtitle = "Specify the configuration file path in settings and create editors.json file"
                 });
                 items.Add(new ListItem(new NoOpCommand())
                 {
-                    Title = "Configuration Steps | 配置步骤",
-                    Subtitle = "1. Command Palette → Settings (bottom left) → Extensions → Project Opener Extension | 命令面板 → 设置(左下角) → 扩展 → Project Opener Extension"
-                });
-                items.Add(new ListItem(new NoOpCommand())
-                {
-                    Title = "",
-                    Subtitle = "2. Enter full path in 'Configuration File Path' (e.g., C:\\config\\editors.json) | 在「配置文件路径」中输入完整路径 (如: C:\\config\\editors.json)"
+                    Title = "Configuration Steps",
+                    Subtitle = "1. Command Palette → Settings (bottom left) → Extensions → Project Opener Extension"
                 });
                 items.Add(new ListItem(new NoOpCommand())
                 {
                     Title = "",
-                    Subtitle = "3. Create and edit the file, refer to configuration examples in settings | 创建并编辑该文件，参考设置页面的配置示例"
+                    Subtitle = "2. Enter full path in 'Configuration File Path' (e.g., C:\\config\\editors.json)"
+                });
+                items.Add(new ListItem(new NoOpCommand())
+                {
+                    Title = "",
+                    Subtitle = "3. Create and edit the file, refer to configuration examples in settings"
                 });
             }
             else
@@ -104,7 +119,7 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
 
         var contextCommands = new List<IContextItem>();
 
-        // 为所有启用的编辑器添加打开命令
+        // Add an open command for every enabled editor
         var enabledEditors = _settingsService.GetEditorConfigs().Where(e => e.IsEnabled).ToList();
         foreach (var editor in enabledEditors)
         {
@@ -112,21 +127,21 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
             contextCommands.Add(new CommandContextItem(openCommand));
         }
 
-        // 添加在文件资源管理器中显示
+        // Add a "show in File Explorer" command
         contextCommands.Add(new CommandContextItem(new OpenFolderCommand(project.Path)));
 
-        // 获取编辑器图标并使用图标服务加载
+        // Get the editor icon and load it with the icon service
         var sourceEditor = editors.Find(e => e.Id == project.SourceEditorId);
         IconData icon;
 
         if (sourceEditor != null)
         {
-            // 如果设置了图标则使用设置的
+            // Use the configured icon if set
             if (!string.IsNullOrEmpty(sourceEditor.Icon))
             {
                 icon = IconService.LoadIcon(sourceEditor.Icon);
             }
-            // 否则尝试从可执行文件提取图标
+            // Otherwise try to extract the icon from the executable
             else if (!string.IsNullOrEmpty(sourceEditor.ExecutablePath) && System.IO.File.Exists(sourceEditor.ExecutablePath))
             {
                 icon = IconService.LoadIcon(sourceEditor.ExecutablePath);
@@ -141,7 +156,7 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
             icon = IconService.GetDefaultIcon();
         }
 
-        // 构建副标题，显示可用编辑器数量
+        // Build the subtitle showing the number of available editors
         var subtitle = project.Path;
         if (project.AvailableEditorIds.Count > 1)
         {
@@ -161,12 +176,9 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
             Subtitle = subtitle,
             Icon = new IconInfo(icon),
             Section = sectionLabel,
-            Tags = new[]
-            {
-                new Tag { Text = FormatLastOpened(project.LastOpened) }
-            },
-            MoreCommands = contextCommands.ToArray()
-        };
+            Tags = [ new Tag { Text = FormatLastOpened(project.LastOpened) } ],
+            MoreCommands = [.. contextCommands]
+		};
     }
 
     private static string FormatLastOpened(DateTime lastOpened)
@@ -187,4 +199,3 @@ internal sealed partial class ProjectOpenerExtensionPage : ListPage
         return lastOpened.ToString("MMM dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 }
-

@@ -1,5 +1,5 @@
-# PowerToys 扩展热重载脚本
-# 使用 x-cmdpal://reload 快速重载,无需重启 PowerToys
+# PowerToys extension hot-reload script
+# Uses x-cmdpal://reload for a quick reload without restarting PowerToys
 
 param(
     [switch]$SkipBuild = $false
@@ -10,49 +10,49 @@ $PackageName = "ProjectOpenerExtension_0.0.1.1_x64__8wekyb3d8bbwe"
 $ProjectPath = "$PSScriptRoot\ProjectOpenerExtension\ProjectOpenerExtension.csproj"
 $MsixPath = "$PSScriptRoot\ProjectOpenerExtension\AppPackages\ProjectOpenerExtension_0.0.1.1_x64_Debug_Test\ProjectOpenerExtension_0.0.1.1_x64_Debug.msix"
 
-Write-Host "=== 🔥 热重载模式 ===" -ForegroundColor Cyan
+Write-Host "=== 🔥 Hot-reload mode ===" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. 卸载旧版本
-Write-Host "[1/4] 卸载旧版本..." -ForegroundColor Yellow
+# 1. Uninstall the old version
+Write-Host "[1/4] Uninstalling the old version..." -ForegroundColor Yellow
 $package = Get-AppxPackage | Where-Object { $_.Name -like "*ProjectOpener*" }
 if ($package) {
     $package | Remove-AppxPackage -ErrorAction SilentlyContinue
-    Write-Host "✓ 旧版本已卸载" -ForegroundColor Green
+    Write-Host "✓ Old version uninstalled" -ForegroundColor Green
 } else {
-    Write-Host "✓ 未找到旧版本" -ForegroundColor Green
+    Write-Host "✓ No old version found" -ForegroundColor Green
 }
 
-# 2. 构建新版本
+# 2. Build the new version
 if (-not $SkipBuild) {
-    Write-Host "[2/4] 构建项目..." -ForegroundColor Yellow
+    Write-Host "[2/4] Building the project..." -ForegroundColor Yellow
     dotnet build $ProjectPath -c Debug -r win-x64 /p:Platform=x64 /p:GenerateAppxPackageOnBuild=true /v:minimal
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "✗ 构建失败" -ForegroundColor Red
+        Write-Host "✗ Build failed" -ForegroundColor Red
         exit 1
     }
-    Write-Host "✓ 构建成功" -ForegroundColor Green
+    Write-Host "✓ Build succeeded" -ForegroundColor Green
 } else {
-    Write-Host "[2/4] 跳过构建" -ForegroundColor Gray
+    Write-Host "[2/4] Skipping build" -ForegroundColor Gray
 }
 
-# 3. 安装新版本
-Write-Host "[3/4] 安装新版本..." -ForegroundColor Yellow
+# 3. Install the new version
+Write-Host "[3/4] Installing the new version..." -ForegroundColor Yellow
 if (Test-Path $MsixPath) {
     Add-AppxPackage -Path $MsixPath
-    Write-Host "✓ 新版本已安装" -ForegroundColor Green
+    Write-Host "✓ New version installed" -ForegroundColor Green
 } else {
-    Write-Host "✗ 找不到 MSIX 包: $MsixPath" -ForegroundColor Red
+    Write-Host "✗ MSIX package not found: $MsixPath" -ForegroundColor Red
     exit 1
 }
 
-# 4. 触发热重载
-Write-Host "[4/4] 触发热重载..." -ForegroundColor Yellow
+# 4. Trigger the hot reload
+Write-Host "[4/4] Triggering the hot reload..." -ForegroundColor Yellow
 Start-Sleep -Milliseconds 500
 Start-Process "x-cmdpal://reload"
-Write-Host "✓ 已发送重载命令" -ForegroundColor Green
+Write-Host "✓ Reload command sent" -ForegroundColor Green
 
 Write-Host ""
-Write-Host "=== 🎉 热重载完成! ===" -ForegroundColor Cyan
-Write-Host "扩展已更新,无需重启 PowerToys!" -ForegroundColor Green
-Write-Host "按 Alt+Space 打开命令面板测试您的更改" -ForegroundColor Yellow
+Write-Host "=== 🎉 Hot reload complete! ===" -ForegroundColor Cyan
+Write-Host "Extension updated, no need to restart PowerToys!" -ForegroundColor Green
+Write-Host "Press Alt+Space to open the Command Palette and test your changes" -ForegroundColor Yellow

@@ -13,14 +13,14 @@ using ProjectOpenerExtension.Models;
 namespace ProjectOpenerExtension.Services;
 
 /// <summary>
-/// 设置管理器 - 使用 PowerToys 的 JsonSettingsManager
+/// Settings manager - uses PowerToys' JsonSettingsManager
 /// </summary>
 public class SettingsManager : JsonSettingsManager
 {
     private static SettingsManager _instance;
     private static readonly string _namespace = "projectopener";
 
-    // VS Code 系列
+    // VS Code family
     private readonly ToggleSetting _enableVSCode;
     private readonly TextSetting _vscodeExecutable;
     private readonly TextSetting _vscodeIcon;
@@ -41,7 +41,7 @@ public class SettingsManager : JsonSettingsManager
     private readonly TextSetting _windsurfIcon;
     private readonly TextSetting _windsurfStoragePath;
 
-    // JetBrains 系列
+    // JetBrains family
     private readonly ToggleSetting _enableIntelliJ;
     private readonly TextSetting _intellijExecutable;
     private readonly TextSetting _intellijIcon;
@@ -177,14 +177,14 @@ public class SettingsManager : JsonSettingsManager
         _datagripIcon = new TextSetting(Namespaced("datagripIcon"), "DataGrip Icon", "Icon emoji", "🗄️");
         _datagripConfigPattern = new TextSetting(Namespaced("datagripConfigPattern"), "DataGrip Config Pattern", "Config folder pattern", "DataGrip*");
 
-        // 添加所有设置到 Settings 集合
+        // Add all settings to the Settings collection
         AddVSCodeSettings();
         AddJetBrainsSettings();
 
-        // 加载设置
+        // Load settings
         LoadSettings();
 
-        // 监听设置变化并自动保存
+        // Listen for settings changes and save automatically
         Settings.SettingsChanged += (s, e) => SaveSettings();
     }
 
@@ -282,12 +282,12 @@ public class SettingsManager : JsonSettingsManager
         return Path.Combine(settingsFolder, "powertoys-settings.json");
     }
 
-    // 构建编辑器配置列表
+    // Build the editor configuration list
     public List<EditorConfig> GetEditorConfigs()
     {
         var configs = new List<EditorConfig>();
 
-        // VS Code 系列
+        // VS Code family
         if (_enableVSCode.Value)
         {
             configs.Add(new EditorConfig
@@ -344,7 +344,7 @@ public class SettingsManager : JsonSettingsManager
             });
         }
 
-        // JetBrains 系列
+        // JetBrains family
         if (_enableIntelliJ.Value)
         {
             configs.Add(new EditorConfig

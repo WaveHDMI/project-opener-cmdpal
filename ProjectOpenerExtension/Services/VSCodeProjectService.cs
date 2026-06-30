@@ -13,7 +13,7 @@ using ProjectOpenerExtension.Models;
 namespace ProjectOpenerExtension.Services;
 
 /// <summary>
-/// VS Code 系列项目读取服务
+/// Service that reads recent projects from VS Code-family editors
 /// </summary>
 public class VSCodeProjectService
 {
@@ -43,7 +43,7 @@ public class VSCodeProjectService
                 var json = File.ReadAllText(editor.StorageFilePath);
                 using var doc = JsonDocument.Parse(json);
 
-                // 尝试新格式：profileAssociations.workspaces
+                // Try the new format: profileAssociations.workspaces
                 if (doc.RootElement.TryGetProperty("profileAssociations", out var profileAssociations))
                 {
                     if (profileAssociations.TryGetProperty("workspaces", out var workspaces))
@@ -51,11 +51,11 @@ public class VSCodeProjectService
                         foreach (var workspace in workspaces.EnumerateObject())
                         {
                             var uri = workspace.Name;
-                            // 只处理本地文件路径，跳过远程路径（vscode-remote://）
+                            // Only handle local file paths, skip remote paths (vscode-remote://)
                             if (!string.IsNullOrEmpty(uri) && uri.StartsWith("file:///") && !uri.Contains("vscode-remote://"))
                             {
                                 var path = Uri.UnescapeDataString(uri.Replace("file:///", "").Replace("/", "\\"));
-                                // 解码URL编码的路径（如 %3A -> :）
+                                // Decode URL-encoded paths (e.g. %3A -> :)
                                 path = Uri.UnescapeDataString(path);
 
                                 if (Directory.Exists(path))
@@ -67,7 +67,7 @@ public class VSCodeProjectService
                     }
                 }
 
-                // 回退到旧格式：openedPathsList
+                // Fall back to the old format: openedPathsList
                 if (doc.RootElement.TryGetProperty("openedPathsList", out var openedPaths))
                 {
                     if (openedPaths.TryGetProperty("entries", out var entries))

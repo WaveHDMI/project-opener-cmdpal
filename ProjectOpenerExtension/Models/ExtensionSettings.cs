@@ -9,33 +9,33 @@ using System.IO;
 namespace ProjectOpenerExtension.Models;
 
 /// <summary>
-/// 编辑器配置
+/// Editor configuration
 /// </summary>
 public class EditorConfig
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string ExecutablePath { get; set; } = string.Empty;
-    public string CommandLineArgs { get; set; } = "\"{0}\""; // {0} 会被替换为项目路径
+    public string CommandLineArgs { get; set; } = "\"{0}\""; // {0} is replaced with the project path
     public string Icon { get; set; } = "📁";
     public EditorType Type { get; set; }
     public bool IsEnabled { get; set; } = true;
 
-    // VSCode 系列编辑器配置
-    public string StorageFilePath { get; set; } = string.Empty; // storage.json 路径
-    public string StorageJsonPath { get; set; } = "openedPathsList.entries"; // JSON 路径
+    // VSCode-family editor configuration
+    public string StorageFilePath { get; set; } = string.Empty; // storage.json path
+    public string StorageJsonPath { get; set; } = "openedPathsList.entries"; // JSON path
 
-    // JetBrains 系列编辑器配置
-    public string ConfigFolderPattern { get; set; } = string.Empty; // 如 "Rider*"
+    // JetBrains-family editor configuration
+    public string ConfigFolderPattern { get; set; } = string.Empty; // e.g. "Rider*"
     public string RecentProjectsFile { get; set; } = "options/recentProjects.xml";
 }
 
 /// <summary>
-/// 扩展配置
+/// Extension configuration
 /// </summary>
 public class ExtensionSettings
 {
-    public List<EditorConfig> Editors { get; set; } = new();
+    public List<EditorConfig> Editors { get; set; } = [];
     public int MaxRecentProjects { get; set; } = 20;
     public bool GroupByEditor { get; set; } = true;
     public bool ShowLastOpenedTime { get; set; } = true;
@@ -44,7 +44,7 @@ public class ExtensionSettings
     {
         var settings = new ExtensionSettings
         {
-            Editors = new List<EditorConfig>()
+            Editors = []
         };
 
         // VS Code

@@ -13,7 +13,7 @@ using ProjectOpenerExtension.Models;
 namespace ProjectOpenerExtension.Services;
 
 /// <summary>
-/// JetBrains IDE 最近项目读取服务
+/// Service that reads recent projects from JetBrains IDEs
 /// </summary>
 public class JetBrainsProjectService
 {
@@ -37,10 +37,10 @@ public class JetBrainsProjectService
             {
                 var configPath = editor.ConfigFolderPattern;
 
-                // 如果是目录，搜索所有版本的 IDEA
+                // If it is a directory, search all IDEA versions
                 if (Directory.Exists(configPath))
                 {
-                    // 搜索所有 IntelliJ IDEA 版本目录
+                    // Search all IntelliJ IDEA version directories
                     var ideaDirs = Directory.GetDirectories(configPath, "IntelliJIdea*");
 
                     foreach (var ideaDir in ideaDirs)
@@ -48,7 +48,7 @@ public class JetBrainsProjectService
                         var recentProjectsFile = Path.Combine(ideaDir, "options", "recentProjects.xml");
                         if (File.Exists(recentProjectsFile))
                         {
-                            Debug.WriteLine($"[JetBrains] 找到配置文件: {recentProjectsFile}");
+                            Debug.WriteLine($"[JetBrains] Found config file: {recentProjectsFile}");
                             var editorProjects = ParseRecentProjects(recentProjectsFile, editor.Id);
 
                             foreach (var project in editorProjects)
@@ -69,16 +69,16 @@ public class JetBrainsProjectService
                         }
                     }
                 }
-                // 如果直接是文件，直接解析
+                // If it is a file, parse it directly
                 else if (File.Exists(configPath))
                 {
-                    Debug.WriteLine($"[JetBrains] 直接解析文件: {configPath}");
+                    Debug.WriteLine($"[JetBrains] Parsing file directly: {configPath}");
                     var editorProjects = ParseRecentProjects(configPath, editor.Id);
                     projects.AddRange(editorProjects);
                 }
                 else
                 {
-                    Debug.WriteLine($"[JetBrains] 路径不存在: {configPath}");
+                    Debug.WriteLine($"[JetBrains] Path does not exist: {configPath}");
                 }
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ public class JetBrainsProjectService
                         {
                             Name = Path.GetFileName(path),
                             Path = path,
-                            AvailableEditorIds = new List<string> { editorId },
+                            AvailableEditorIds = [editorId],
                             LastOpened = Directory.GetLastWriteTime(path),
                             SourceEditorId = editorId
                         });

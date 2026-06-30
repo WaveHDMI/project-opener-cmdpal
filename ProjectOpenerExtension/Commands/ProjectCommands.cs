@@ -9,7 +9,7 @@ using ProjectOpenerExtension.Services;
 namespace ProjectOpenerExtension.Commands;
 
 /// <summary>
-/// 在指定编辑器中打开项目的命令
+/// Command to open a project in the specified editor
 /// </summary>
 public partial class OpenProjectCommand : InvokableCommand
 {
@@ -24,9 +24,9 @@ public partial class OpenProjectCommand : InvokableCommand
         var editor = DynamicSettingsManager.Instance.GetEditorConfigs().Find(e => e.Id == editorId);
         if (editor != null)
         {
-            Name = $"使用 {editor.Name} 打开";
+            Name = $"Open with {editor.Name}";
 
-            // 如果设置了图标则使用设置的，否则从 exe 文件提取
+            // Use the configured icon if set, otherwise extract it from the exe file
             if (!string.IsNullOrWhiteSpace(editor.Icon))
             {
                 Icon = new(editor.Icon);
@@ -42,7 +42,7 @@ public partial class OpenProjectCommand : InvokableCommand
         }
         else
         {
-            Name = "打开";
+            Name = "Open";
             Icon = new("📁");
         }
     }
@@ -55,13 +55,17 @@ public partial class OpenProjectCommand : InvokableCommand
             return CommandResult.Dismiss();
         }
 
-        if (editor.Type == EditorType.VSCode)
+        switch (editor.Type)
         {
-            VSCodeProjectService.OpenInEditor(_project.Path, _editorId);
-        }
-        else
-        {
-            JetBrainsProjectService.OpenInJetBrainsIDE(_project.Path, _editorId);
+            case EditorType.VSCode:
+                VSCodeProjectService.OpenInEditor(_project.Path, _editorId);
+                break;
+            case EditorType.VisualStudio:
+                VisualStudioProjectService.OpenInEditor(_project.Path, _editorId);
+                break;
+            default:
+                JetBrainsProjectService.OpenInJetBrainsIDE(_project.Path, _editorId);
+                break;
         }
 
         return CommandResult.Dismiss();
@@ -69,7 +73,7 @@ public partial class OpenProjectCommand : InvokableCommand
 }
 
 /// <summary>
-/// 在文件资源管理器中打开项目文件夹
+/// Open the project folder in File Explorer
 /// </summary>
 public partial class OpenFolderCommand : InvokableCommand
 {
@@ -78,16 +82,18 @@ public partial class OpenFolderCommand : InvokableCommand
     public OpenFolderCommand(string path)
     {
         _path = path;
-        Name = "在文件资源管理器中显示";
+        Name = "Show in File Explorer";
         Icon = new("📂");
     }
 
     public override CommandResult Invoke()
     {
+        // _path may be a file (e.g. a Visual Studio .sln); open its containing folder in that case.
+        var target = System.IO.File.Exists(_path) ? System.IO.Path.GetDirectoryName(_path) ?? _path : _path;
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = "explorer.exe",
-            Arguments = $"\"{_path}\"",
+            Arguments = $"\"{target}\"",
             UseShellExecute = true
         });
         return CommandResult.Dismiss();

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace ProjectOpenerExtension.Models;
 
 /// <summary>
-/// 编辑器类型
+/// Editor type
 /// </summary>
 public enum EditorType
 {
@@ -23,17 +23,16 @@ public enum EditorType
     RubyMine,
     CLion,
     DataGrip,
-    Fleet,
 }
 
 /// <summary>
-/// 项目信息
+/// Project information
 /// </summary>
 public class ProjectInfo
 {
     public string Name { get; set; } = string.Empty;
     public string Path { get; set; } = string.Empty;
-    public List<string> AvailableEditorIds { get; set; } = new List<string>(); // 改为编辑器ID列表
+    public List<string> AvailableEditorIds { get; set; } = []; // List of editor IDs
     public DateTime LastOpened { get; set; }
-    public string SourceEditorId { get; set; } = string.Empty; // 来源编辑器ID
+    public string SourceEditorId { get; set; } = string.Empty; // Source editor ID
 }

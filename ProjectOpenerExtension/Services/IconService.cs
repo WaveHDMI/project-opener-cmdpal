@@ -9,14 +9,14 @@ using Microsoft.CommandPalette.Extensions.Toolkit;
 namespace ProjectOpenerExtension.Services;
 
 /// <summary>
-/// 图标服务 - 从文件加载图标
+/// Icon service - loads icons from files
 /// </summary>
 public static class IconService
 {
     /// <summary>
-    /// 从路径加载图标
-    /// 支持: .png, .ico, .jpg 文件 (相对路径基于应用程序目录)
-    /// 也支持从 .exe 文件提取图标 (格式: "path.exe,index")
+    /// Load an icon from a path
+    /// Supports: .png, .ico, .jpg files (relative paths are based on the application directory)
+    /// Also supports extracting icons from .exe files (format: "path.exe,index")
     /// </summary>
     public static IconData LoadIcon(string iconPath)
     {
@@ -27,12 +27,12 @@ public static class IconService
 
         try
         {
-            // 如果是相对路径,转换为绝对路径
+            // If it is a relative path, convert it to an absolute path
             var fullPath = Path.IsPathRooted(iconPath)
                 ? iconPath
                 : Path.Combine(AppContext.BaseDirectory, iconPath);
 
-            // 检查文件是否存在
+            // Check whether the file exists
             if (!File.Exists(fullPath))
             {
                 System.Diagnostics.Debug.WriteLine($"Icon file not found: {fullPath}, using default");
@@ -41,13 +41,13 @@ public static class IconService
 
             var extension = Path.GetExtension(fullPath).ToLowerInvariant();
 
-            // 对于图片文件,直接使用路径
+            // For image files, use the path directly
             if (extension == ".png" || extension == ".ico" || extension == ".jpg" || extension == ".jpeg")
             {
                 return new IconData(fullPath);
             }
 
-            // 对于可执行文件,从 exe 提取图标 (使用索引 0)
+            // For executables, extract the icon from the exe (using index 0)
             if (extension == ".exe" || extension == ".dll")
             {
                 return new IconData($"{fullPath},0");
@@ -64,11 +64,11 @@ public static class IconService
     }
 
     /// <summary>
-    /// 获取默认图标 (当无法加载自定义图标时使用)
+    /// Get the default icon (used when a custom icon cannot be loaded)
     /// </summary>
     public static IconData GetDefaultIcon()
     {
-        // 使用默认的应用程序图标
+        // Use the default application icon
         return new IconData("📦");
     }
 }

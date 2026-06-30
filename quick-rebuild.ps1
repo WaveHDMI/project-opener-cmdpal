@@ -1,5 +1,5 @@
-# 快速重建脚本 - 只构建不安装
-# 用于检查编译错误
+# Quick rebuild script - build only, no install
+# Used to check for compile errors
 
 param(
     [string]$Configuration = "Debug"
@@ -7,13 +7,13 @@ param(
 
 $ProjectPath = "$PSScriptRoot\ProjectOpenerExtension\ProjectOpenerExtension.csproj"
 
-Write-Host "=== 快速构建 ===" -ForegroundColor Cyan
+Write-Host "=== Quick build ===" -ForegroundColor Cyan
 dotnet build $ProjectPath -c $Configuration -r win-x64 /p:Platform=x64 /p:GenerateAppxPackageOnBuild=false
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
-    Write-Host "✓ 构建成功! 运行 .\update-extension.ps1 -SkipBuild 来快速安装" -ForegroundColor Green
+    Write-Host "✓ Build succeeded! Run .\update-extension.ps1 -SkipBuild for a quick install" -ForegroundColor Green
 } else {
     Write-Host ""
-    Write-Host "✗ 构建失败,请修复错误" -ForegroundColor Red
+    Write-Host "✗ Build failed, please fix the errors" -ForegroundColor Red
 }
